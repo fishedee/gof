@@ -118,7 +118,7 @@ func logFormatter(param logFormatterParams) string {
 		methodColor = colorForMethod(param.Method)
 	}
 
-	return fmt.Sprintf("[GOF] %13v | %15s |%s %-7s %s %s|%s",
+	return fmt.Sprintf("[GOF] %13v | %15s |%s %-7s %s %s|%s\n",
 		param.TimeStamp.Format("2006/01/02 - 15:04:05"),
 		param.Latency,
 		param.ClientIP,

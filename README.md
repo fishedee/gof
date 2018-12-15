@@ -52,16 +52,18 @@ func main() {
     // logger and recovery (crash-free) middleware
     router := gof.NewDefaultRouterFactory()
 
-    router.GET("/someGet", getting)
-    router.POST("/somePost", posting)
-    router.PUT("/somePut", putting)
-    router.DELETE("/someDelete", deleting)
-    router.PATCH("/somePatch", patching)
-    router.HEAD("/someHead", head)
-    router.OPTIONS("/someOptions", options)
-    router.ANY("/someAny",any)
+    router.GET("/someGet", doSomething)
+    router.POST("/somePost", doSomething)
+    router.PUT("/somePut", doSomething)
+    router.DELETE("/someDelete", doSomething)
+    router.PATCH("/somePatch", doSomething)
+    router.HEAD("/someHead", doSomething)
+    router.OPTIONS("/someOptions", doSomething)
+    router.Any("/someAny", doSomething)
 
-    http.Handle('/',router.Create())
+    // Listen and serve on 0.0.0.0:8080
+    http.Handle("/", router.Create())
+    http.ListenAndServe(":8080", nil)
 }
 ```
 
@@ -72,25 +74,26 @@ func main() {
     router := gof.NewDefaultRouterFactory()
 
     // This handler will match /user/john but will not match /user/ or /user
-    router.GET("/user/:name", func(w http.ResponseWriter,r * http.Request,param gof.RouterParam) {
+    router.GET("/user/:name", func(w http.ResponseWriter, r *http.Request, param gof.RouterParam) {
         name := param[0].Value
-        fmt.Fprintf(w,"name: %v",name)
+        fmt.Fprintf(w, "name: %v", name)
     })
 
     // However, this one will match /user/john/post and also /user/john/send
-    router.GET("/user/:name/:action", func(w http.ResponseWriter,r * http.Request,param gof.RouterParam) {
+    router.GET("/user/:name/:action", func(w http.ResponseWriter, r *http.Request, param gof.RouterParam) {
         name := param[0].Value
         action := param[1].Value
-        fmt.Fprintf(w,"%v is  %v",name,action)
+        fmt.Fprintf(w, "%v is %v", name, action)
     })
 
     // and this one will match /user/fish/post and also /user/fish/send
-    router.GET("/user/fish/:action", func(w http.ResponseWriter,r * http.Request,param gof.RouterParam) {
+    router.GET("/user/fish/:action", func(w http.ResponseWriter, r *http.Request, param gof.RouterParam) {
         action := param[0].Value
-        fmt.Fprintf(w,"friend fish is  %v",name,action)
+        fmt.Fprintf(w, "friend fish is %v", action)
     })
 
-    http.Handle('/',router.Create())
+    http.Handle("/", router.Create())
+    http.ListenAndServe(":8080", nil)
 }
 ```
 
@@ -99,10 +102,11 @@ func main() {
 ```go
 func main() {
     router := gof.NewDefaultRouterFactory()
-    router.Static("/assets", "./assets")
+    router.Static("/assets", "../../")
 
     // Listen and serve on 0.0.0.0:8080
-    http.Handle('/',router.Create())
+    http.Handle("/", router.Create())
+    http.ListenAndServe(":8080", nil)
 }
 ```
 
@@ -112,11 +116,12 @@ func main() {
 func main() {
     router := gof.NewDefaultRouterFactory()
     router.NotFound(func(w http.ResponseWriter, r *http.Request) {
-    	w.Write([]byte("404 not found by hello world"))
+        w.Write([]byte("404 not found by hello world"))
     })
 
     // Listen and serve on 0.0.0.0:8080
-    http.Handle('/',router.Create())
+    http.Handle("/", router.Create())
+    http.ListenAndServe(":8080", nil)
 }
 ```
 
@@ -127,21 +132,22 @@ func main() {
     router := gof.NewDefaultRouterFactory()
 
     // Simple group: v1
-    router.Group("/v1",func(v1 *gof.RouterFactory) {
-    	v1.POST("/login", loginEndpoint)
-        v1.POST("/submit", submitEndpoint)
-        v1.POST("/read", readEndpoint)
+    router.Group("/v1", func(v1 *gof.RouterFactory) {
+        v1.GET("/login", loginEndpoint)
+        v1.GET("/submit", submitEndpoint)
+        v1.GET("/read", readEndpoint)
     })
 
     // Simple group: v2
-    router.Group("/v2",func(v2 *gof.RouterFactory) {
-    	v2.POST("/login", loginEndpoint)
-        v2.POST("/submit", submitEndpoint)
-        v2.POST("/read", readEndpoint)
+    router.Group("/v2", func(v2 *gof.RouterFactory) {
+        v2.GET("/login", loginEndpoint)
+        v2.GET("/submit", submitEndpoint)
+        v2.GET("/read", readEndpoint)
     })
 
     // Listen and serve on 0.0.0.0:8080
-    http.Handle('/',router.Create())
+    http.Handle("/", router.Create())
+    http.ListenAndServe(":8080", nil)
 }
 ```
 
@@ -151,17 +157,17 @@ func main() {
 ```go
 func main() {
     // Creates a router without any middleware by default
-    r := gof.NewRouterFactory()
+    router := gof.NewRouterFactory()
 
-    // Global middleware
-    // Logger middleware will write the logs to gin.DefaultWriter even if you set with GIN_MODE=release.
-    r.Use(gof.Logger())
+    // Global logger middleware
+    router.Use(gof.Logger())
 
     // Recovery middleware recovers from any panics and writes a 500 if there was one.
-    r.Use(gof.Recovery())
+    router.Use(gof.Recovery())
 
     // Listen and serve on 0.0.0.0:8080
-    http.Handle('/',router.Create())
+    http.Handle("/", router.Create())
+    http.ListenAndServe(":8080", nil)
 }
 ```
 
